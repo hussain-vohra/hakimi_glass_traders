@@ -441,6 +441,97 @@
             });
         }
     </script>
+    <!-- PWA Install Prompt -->
+<div id="installBanner" style="
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  z-index: 9999;
+  width: 90%;
+  max-width: 400px;
+  display: none;
+  align-items: center;
+  gap: 12px;
+">
+  <img src="./icons/icon-192.png" width="48" height="48" style="border-radius:10px; flex-shrink:0;">
+  <div style="flex:1;">
+    <div style="font-weight:800; font-size:0.9rem; color:#1e293b;">Hakimi Glass Traders</div>
+    <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">Install app for quick offline access</div>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
+    <button onclick="installApp()" style="
+      background: #059669;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+    ">Install</button>
+    <button onclick="dismissBanner()" style="
+      background: #f1f5f9;
+      color: #64748b;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+    ">Not now</button>
+  </div>
+</div>
+
+<script>
+  let deferredPrompt = null;
+  const banner = document.getElementById('installBanner');
+
+  // Capture the install prompt event
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); // Stop the mini-infobar from appearing
+    deferredPrompt = e;
+
+    // Only show if user hasn't dismissed before
+    if (!localStorage.getItem('hk_install_dismissed')) {
+      // Small delay so it doesn't pop immediately on load
+      setTimeout(() => {
+        banner.style.display = 'flex';
+      }, 3000);
+    }
+  });
+
+  function installApp() {
+    banner.style.display = 'none';
+    if (deferredPrompt) {
+      deferredPrompt.prompt(); // Show the native install dialog
+      deferredPrompt.userChoice.then((result) => {
+        if (result.outcome === 'accepted') {
+          console.log('App installed');
+        }
+        deferredPrompt = null;
+      });
+    }
+  }
+
+  function dismissBanner() {
+    banner.style.display = 'none';
+    // Remember dismissal so it doesn't keep popping up
+    localStorage.setItem('hk_install_dismissed', '1');
+  }
+
+  // Hide banner if app is already installed
+  window.addEventListener('appinstalled', () => {
+    banner.style.display = 'none';
+    deferredPrompt = null;
+  });
+</script>
 </body>
 
 </html>
