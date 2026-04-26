@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HAKIMI GLASS TRADERS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #059669;
+            --bg: #f8fafc;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            margin: 0;
+            padding: 10px;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .unit-toggle {
+            display: flex;
+            background: #e2e8f0;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 12px;
+        }
+
+        .unit-btn {
+            flex: 1;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 900;
+            background: transparent;
+            color: #64748b;
+        }
+
+        .unit-btn.active {
+            background: var(--danger);
+            color: white;
+        }
+
+        .frame-row {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            border-left: 5px solid var(--primary);
+        }
+
+        .btn {
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            padding: 15px;
+            width: 100%;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        /* Invoice Styling */
+        .invoice-box {
+            background: white;
+            padding: 25px;
+            border: 1px solid #eee;
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 11px;
+            table-layout: fixed;
+        }
+
+        th {
+            border-bottom: 2px solid #334155;
+            padding: 10px 5px;
+            text-transform: uppercase;
+            color: #475569;
+        }
+
+        td {
+            padding: 12px 5px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .glass-tag {
+            font-size: 9px;
+            color: var(--danger);
+            font-weight: bold;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .total-row {
+            text-align: right;
+            margin-top: 20px;
+            border-top: 2px solid #334155;
+            padding-top: 10px;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+    </style>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- iOS support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Your App">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+    <!-- Theme color for browser chrome -->
+    <meta name="theme-color" content="#0f172a">
+</head>
+
+<body onload="loadData()">
+
+    <div class="container">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h2 style="font-size: 1.1rem; color: var(--primary); margin:0;">HAKIMI GLASS TRADERS</h2>
+                <button onclick="resetForNewBill()"
+                    style="font-size:10px; background:#e2e8f0; border:none; padding:5px 10px; border-radius:5px; font-weight:bold; color:#475569;">NEW
+                    BILL</button>
+            </div>
+
+            <div class="unit-toggle">
+                <button class="unit-btn active" id="btn-inch" onclick="setUnit('inch')">INCHES</button>
+                <button class="unit-btn" id="btn-mm" onclick="setUnit('mm')">MM</button>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
+                <div><label>Customer Name</label><input type="text" id="custName" placeholder="Name"></div>
+                <div><label>Inv No.</label><input type="number" id="invNo" value="101" onchange="saveInvNo()"></div>
+            </div>
+
+            <div id="frameContainer"></div>
+            <button class="btn" style="background:#64748b; color:white;" onclick="addFrame()">＋ Add Item</button>
+
+            <div style="grid-template-columns: 1fr 1fr; display:grid; gap:8px; margin-top:10px;">
+                <div><label>Prof. Rs/ft</label><input type="number" id="pRate" value="120" onchange="saveSettings()">
+                </div>
+                <div><label>Hand. Rs/ft</label><input type="number" id="hRate" value="150" onchange="saveSettings()">
+                </div>
+                <div><label>Lab. Rs/Fr</label><input type="number" id="labRate" value="200" onchange="saveSettings()">
+                </div>
+                <div><label>Delivery Rs.</label><input type="number" id="dRate" value="0" onchange="saveSettings()">
+                </div>
+            </div>
+
+            <button class="btn" style="background:var(--primary); color:white; margin-top:10px;"
+                onclick="processInvoice()">⚡ Generate Bill</button>
+        </div>
+
+        <div id="resultsArea" style="display:none">
+            <div id="invoiceCapture" class="card" style="padding:0;">
+                <div class="invoice-box">
+                    <div class="bill-header">
+                        <div>
+                            <b style="font-size:18px; color:var(--primary);">HAKIMI GLASS TRADERS</b><br>
+                            <span style="font-size:11px; color:#1e293b; letter-spacing: 0.5px;"><b>MOB: +91
+                                    9821353511</b></span>
+                        </div>
+                        <div style="text-align: right;">
+                            <b>Inv No: <span id="dispInvNo"></span></b><br>
+                            <b>Date: <span id="invDate"></span></b>
+                        </div>
+                    </div>
+                    <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
+                    <p><b>Bill To:</b> <span id="dispCustName"></span></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="text-left" width="40%">Description</th>
+                                <th class="text-right" width="20%">Qty/Sqft</th>
+                                <th class="text-right" width="20%">Rate</th>
+                                <th class="text-right" width="20%">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invItems"></tbody>
+                    </table>
+                    <div class="total-row">GRAND TOTAL: Rs. <span id="grandTotal"></span></div>
+                </div>
+            </div>
+            <button class="btn" style="background:#3b82f6; color:white;" onclick="downloadInvoiceImage()">📸 Save &
+                Share Bill</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUnit = 'inch';
+
+        const glassLibrary = [
+            { name: "3.5mm Grey Tinted", rate: 50 },
+            { name: "3.5mm Brown Tinted", rate: 50 },
+            { name: "4mm Clear", rate: 50 },
+            { name: "5mm Clear", rate: 60 },
+            { name: "6mm Clear", rate: 72 },
+            { name: "4mm Frosted", rate: 95 },
+            { name: "4mm Lining Frosted", rate: 95 },
+            { name: "5mm Clear Moru", rate: 120 },
+            { name: "5mm Grey Moru", rate: 140 },
+            { name: "5mm Brown Moru", rate: 140 },
+            { name: "4mm Mirror", rate: 85 },
+            { name: "5mm Mirror", rate: 100 },
+            { name: "NO GLASS ONLY PROFILE", rate: 0 }
+        ];
+
+        function setUnit(u) {
+            if (u === currentUnit) return;
+            document.querySelectorAll('.w, .h').forEach(i => {
+                let v = eval(i.value.replace(/ /g, '+')) || 0;
+                if (v > 0) i.value = (u === 'mm') ? Math.round(v * 25.4) : (v / 25.4).toFixed(2);
+            });
+            currentUnit = u;
+            document.getElementById('btn-inch').classList.toggle('active', u === 'inch');
+            document.getElementById('btn-mm').classList.toggle('active', u === 'mm');
+        }
+
+        function addFrame() {
+            const id = Date.now();
+            const div = document.createElement('div');
+            div.className = 'frame-row'; div.id = id;
+            let options = glassLibrary.map(g => `<option value="${g.rate}">${g.name} (Rs.${g.rate})</option>`).join('');
+            div.innerHTML = `<select class="gt">${options}</select>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:5px;">
+        <div><label>Qty</label><input type="number" class="q" value="1"></div>
+        <div><label>Type</label><select class="t"><option value="A">Prof</option><option value="B">Mix</option></select></div>
+        <div><label>W</label><input type="text" class="w"></div>
+        <div><label>H</label><input type="text" class="h"></div>
+    </div>
+    <button style="position:absolute; top:2px; right:5px; color:red; border:none; background:none; font-weight:bold;" onclick="document.getElementById('${id}').remove()">✕</button>`;
+            document.getElementById('frameContainer').appendChild(div);
+        }
+
+        function masterRound(valInches) { return Math.ceil(valInches / 6) * 6; }
+
+        function calculateBestFit(cuts) {
+            const STOCK = 3000; let bars = [];
+            cuts.sort((a, b) => b - a).forEach(cut => {
+                let bestIdx = -1; let minGap = STOCK + 1;
+                for (let i = 0; i < bars.length; i++) {
+                    if (bars[i] >= cut && (bars[i] - cut) < minGap) { minGap = bars[i] - cut; bestIdx = i; }
+                }
+                if (bestIdx !== -1) bars[bestIdx] -= cut; else bars.push(STOCK - cut);
+            });
+            return (bars.length * STOCK - bars.reduce((a, b) => a + (b >= 300 ? b : 0), 0)) / 304.8;
+        }
+
+        function processInvoice() {
+            const pRate = parseFloat(document.getElementById('pRate').value) || 0;
+            const hRate = parseFloat(document.getElementById('hRate').value) || 0;
+            const labRate = parseFloat(document.getElementById('labRate').value) || 0;
+            const dRate = parseFloat(document.getElementById('dRate').value) || 0;
+
+            let pCuts = [], hCuts = [], frameCount = 0, rows = "";
+            let glassAggregation = {}; // Object to club identical glass types
+
+            document.querySelectorAll('.frame-row').forEach(r => {
+                const q = parseInt(r.querySelector('.q').value) || 0;
+                const gPrice = parseFloat(r.querySelector('.gt').value);
+                const gName = r.querySelector('.gt').options[r.querySelector('.gt').selectedIndex].text.split(' (')[0];
+                let wInput = r.querySelector('.w').value;
+                let hInput = r.querySelector('.h').value;
+
+                if (!wInput || !hInput || q <= 0) return;
+
+                let wIn = (currentUnit === 'mm') ? (eval(wInput.replace(/ /g, '+')) / 25.4) : eval(wInput.replace(/ /g, '+'));
+                let hIn = (currentUnit === 'mm') ? (eval(hInput.replace(/ /g, '+')) / 25.4) : eval(hInput.replace(/ /g, '+'));
+
+                let rW = masterRound(wIn);
+                let rH = masterRound(hIn);
+                let totalSqft = ((rW * rH) / 144) * q;
+
+                // Grouping by Glass Name
+                if (!glassAggregation[gName]) {
+                    glassAggregation[gName] = { totalSqft: 0, price: gPrice, details: [] };
+                }
+                glassAggregation[gName].totalSqft += totalSqft;
+                glassAggregation[gName].details.push(`${q} Nos (${rW}"x${rH}")`);
+
+                frameCount += q;
+
+                let wMM = wIn * 25.4; let hMM = hIn * 25.4;
+                for (let i = 0; i < q; i++) {
+                    if (r.querySelector('.t').value === 'A') pCuts.push(wMM + 6, wMM + 6, hMM + 6, hMM + 6);
+                    else { pCuts.push(wMM + 6, wMM + 6, hMM + 6); hCuts.push(hMM + 6); }
+                }
+            });
+
+            let totalGlassCost = 0;
+            for (let gName in glassAggregation) {
+                let g = glassAggregation[gName];
+                if (g.price > 0) {
+                    let rowCost = Math.round(g.totalSqft * g.price);
+                    totalGlassCost += rowCost;
+                    rows += `<tr>
+                <td class="text-left">
+                    <b>${gName}</b><br>
+                    <span class="glass-tag">${g.details.join(", ")}</span>
+                </td>
+                <td class="text-right">${g.totalSqft.toFixed(2)}</td>
+                <td class="text-right">Rs. ${g.price}</td>
+                <td class="text-right">Rs. ${rowCost.toLocaleString('en-IN')}</td>
+            </tr>`;
+                }
+            }
+
+            let pFt = Math.ceil(calculateBestFit(pCuts) * 2) / 2;
+            let hFt = Math.ceil(calculateBestFit(hCuts) * 2) / 2;
+            let pCost = Math.round(pFt * pRate);
+            let hCost = Math.round(hFt * hRate);
+            let lCost = frameCount * labRate;
+
+            if (pFt > 0) rows += `<tr><td class="text-left"><b>Profile Section</b></td><td class="text-right">${pFt} ft</td><td class="text-right">Rs. ${pRate}</td><td class="text-right">Rs. ${pCost.toLocaleString('en-IN')}</td></tr>`;
+            if (hFt > 0) rows += `<tr><td class="text-left"><b>Handle Section</b></td><td class="text-right">${hFt} ft</td><td class="text-right">Rs. ${hRate}</td><td class="text-right">Rs. ${hCost.toLocaleString('en-IN')}</td></tr>`;
+            if (frameCount > 0) rows += `<tr><td class="text-left"><b>Labour Charges</b></td><td class="text-right">${frameCount} No.</td><td class="text-right">Rs. ${labRate}</td><td class="text-right">Rs. ${lCost.toLocaleString('en-IN')}</td></tr>`;
+            if (dRate > 0) rows += `<tr><td class="text-left"><b>Delivery Charges</b></td><td class="text-right">-</td><td class="text-right">-</td><td class="text-right">Rs. ${dRate.toLocaleString('en-IN')}</td></tr>`;
+
+            document.getElementById('invItems').innerHTML = rows;
+            document.getElementById('grandTotal').innerText = (totalGlassCost + pCost + hCost + lCost + dRate).toLocaleString('en-IN');
+            document.getElementById('dispCustName').innerText = document.getElementById('custName').value || "Counter_Sale";
+            document.getElementById('dispInvNo').innerText = document.getElementById('invNo').value;
+            document.getElementById('invDate').innerText = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');
+            document.getElementById('resultsArea').style.display = 'block';
+        }
+
+        function downloadInvoiceImage() {
+            const cName = document.getElementById('custName').value.replace(/ /g, '_') || "Customer";
+            const iNo = document.getElementById('invNo').value;
+            const fileName = `HAKIMI_${cName}_${iNo}_${document.getElementById('invDate').innerText}.png`;
+            html2canvas(document.getElementById('invoiceCapture'), { scale: 3 }).then(c => {
+                let l = document.createElement('a'); l.download = fileName; l.href = c.toDataURL(); l.click();
+                document.getElementById('invNo').value = parseInt(iNo) + 1;
+                saveInvNo();
+            });
+        }
+
+        function saveSettings() {
+            localStorage.setItem('hk_pRate', document.getElementById('pRate').value);
+            localStorage.setItem('hk_hRate', document.getElementById('hRate').value);
+            localStorage.setItem('hk_labRate', document.getElementById('labRate').value);
+            localStorage.setItem('hk_dRate', document.getElementById('dRate').value);
+        }
+
+        function saveInvNo() { localStorage.setItem('hk_invNo', document.getElementById('invNo').value); }
+
+        function loadData() {
+            if (localStorage.getItem('hk_invNo')) document.getElementById('invNo').value = localStorage.getItem('hk_invNo');
+            if (localStorage.getItem('hk_pRate')) document.getElementById('pRate').value = localStorage.getItem('hk_pRate');
+            if (localStorage.getItem('hk_hRate')) document.getElementById('hRate').value = localStorage.getItem('hk_hRate');
+            if (localStorage.getItem('hk_labRate')) document.getElementById('labRate').value = localStorage.getItem('hk_labRate');
+            if (localStorage.getItem('hk_dRate')) document.getElementById('dRate').value = localStorage.getItem('hk_dRate');
+            addFrame();
+        }
+
+        function resetForNewBill() {
+            if (confirm("Start new bill?")) {
+                document.getElementById('custName').value = "";
+                document.getElementById('frameContainer').innerHTML = "";
+                document.getElementById('resultsArea').style.display = "none";
+                document.getElementById('dRate').value = 0;
+                addFrame();
+            }
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('SW registered'))
+                    .catch(err => console.error('SW failed:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
